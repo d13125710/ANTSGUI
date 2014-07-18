@@ -22,6 +22,7 @@
     <None Include="res\GA.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Report1.rdlc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

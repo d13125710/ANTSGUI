@@ -3,7 +3,7 @@
 
 
 CAnt::CAnt(size_t n)
-	: m_antTour(n) , m_visted(n) , tourLength(0)
+	: m_antTour(n+1) , m_visted(n) , tourLength(0)
 {
 	//this->m_antTour.resize(n);
 //	this->m_visted.resize(n);

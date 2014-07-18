@@ -337,7 +337,7 @@ UINT MyThreadBWA(LPVOID pParam)
 
 	mmas.initPheromones(); //set to ramdom
 	mmas.calculateHeuristicMatrix(); //cal table
-	mmas.initAnts();  //clear ants
+	//mmas.initAnts();  //clear ants
 	for(int i = 0; i < par.Epochs; i++)
 	{
 		mmas.constructSolutions();
@@ -440,7 +440,7 @@ void TSPalgorithm::Run(Parameters &par ,   std::vector<std::vector<int> >  &matr
 			break;
 				}
 		case EAS: {
-			m_pThread = AfxBeginThread(MyThreadMMAS,((LPVOID)this));
+			m_pThread = AfxBeginThread(MyThreadElite,((LPVOID)this));
 			break;
 				}
 		case BWAS: {

@@ -181,13 +181,13 @@ void CAntColonySystem::initPheromones()
 	for(int i =0 ; i < m_noNodes; i++)
 	{
 		
-		std::vector<size_t> randomPath(m_noNodes);
+		std::vector<size_t> randomPath(m_noNodes+1);
 		for (size_t i=0; i<m_noNodes; i++)
 			randomPath[i]=i;
 		
-		//randomPath[m_noNodes]=0;
+		randomPath[m_noNodes]=0;
 
-		std::random_shuffle( randomPath.begin() , randomPath.end());
+		std::random_shuffle( randomPath.begin()+1 , randomPath.end()-1);
 
 		//std::random_shuffle( m_randomPath.begin() , m_randomPath.end() );
 
@@ -196,7 +196,9 @@ void CAntColonySystem::initPheromones()
 		double dist=this->calculatePathLength(randomPath);
 		if(dist < best_distance  )
 		{
-			m_bestSoFarPath = randomPath;
+			m_BestAntToDate.setAntsTour(randomPath);
+			m_BestAntToDate.setAntTourLength(dist);
+			//m_bestSoFarPath = randomPath;
 			best_distance = dist;
 
 		}
@@ -215,7 +217,7 @@ void CAntColonySystem::initPheromones()
 //m_bestSoFarPath  = m_pLocalSearch->greedyPath(this->m_noNodes);
 //	m_pLocalSearch->opt3(m_bestSoFarPath);
 
-	m_bestSoFarPathlength=this->calculatePathLength(m_bestSoFarPath);
+	//m_bestSoFarPathlength=this->calculatePathLength(m_bestSoFarPath);
 	//this->m_bestSoFarPathlength = (int)lenght;
 	tau0 = 1/ ((double)m_noNodes * best_distance);
 
@@ -229,7 +231,7 @@ void CAntColonySystem::initPheromones()
 
 	std::vector<bool> visited(m_noNodes);
 	std::vector<size_t> nntour(m_noNodes+1);
-	calculateNearestNeigbhor(m_noAnts);
+	calculateNearestNeigbhor(m_noNodes);
 	//calculate min max values inital
 	int phase = 0;
 	int rnd= (rand()%(visited.size()-1))+1;
@@ -380,9 +382,9 @@ void CAntColonySystem::constructSolutions()
 
 	for(size_t step = 1 ; step < m_noNodes; step++)
 	{
-		for(size_t k = 0; k < m_noAnts; k++)
+		for(size_t k = 0; k < m_Ants.size(); k++)
 		{
-			decisionRule(k,step);
+			decisionRule2(k,step);
 			localPheromoneUpdate(k,step);
 		
 		}
@@ -390,8 +392,8 @@ void CAntColonySystem::constructSolutions()
      
 	for(int k = 0; k < m_noAnts; k++)
 	{
-	//	int tourstart=m_Ants[k].getCity(0);
-	//	m_Ants[k].setAntCity(m_noNodes,tourstart);
+		int tourstart=m_Ants[k].getCity(0);
+		m_Ants[k].setAntCity(m_noNodes,tourstart);
 	
 		const std::vector<size_t>& tourvector = m_Ants[k].getAntsCityTour();
 		m_Ants[k].setAntTourLength((int)calculatePathLength(tourvector));
@@ -644,7 +646,7 @@ void CAntColonySystem::choose_best_next(CAnt& a, size_t phase)
 	current_city = a.getAntsCityTour()[phase - 1];
 	
 	value_best = -1.; /* values in total matix are always >= 0.0 */
-	for (i = 0; i < this->m_noNodes; i++) 
+	for (i = 0; i < this->m_noAnts; i++) 
 	{
 	    help_city = this->m_nnList[current_city][i];
 	    if (a.isCityVisited(help_city))

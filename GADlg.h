@@ -44,6 +44,8 @@ public:
 
 private:
 
+	CStatusBar m_bar;
+
 	void DrawNodes(int cc1, int cc2 ,int rectx1, int rectx2, int recty2, int recty1, CDC &dc)
 	{
 

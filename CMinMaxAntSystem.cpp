@@ -9,15 +9,12 @@ CMinMaxAntSystem::CMinMaxAntSystem(Parameters& Par , std::vector<std::vector<int
 {
 	 m_stagnationIterations = 0;
      m_maxStagnationIterations = Par.maxStagnationIterations;
-    // m_doOpt2 = false;
- //    m_doOpt3 = true;
-	 m_bestIterationLength = (std::numeric_limits<int>::max)();
+  	 m_bestIterationLength = (std::numeric_limits<int>::max)();
 	 m_restartBestAntTourLength =  (std::numeric_limits<int>::max)();
 	 lambda = Par.lambda ; // 0.05;
 	 m_resetAnt =false;
-
-	 m_restartAntBestPath.resize(m_noNodes); ;
-	 m_bestIterationAntPath.resize(m_noNodes); ;
+	 m_restartAntBestPath.resize(m_noNodes); 
+	 m_bestIterationAntPath.resize(m_noNodes); 
 
 }
 void CMinMaxAntSystem::chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour)
@@ -94,32 +91,35 @@ void CMinMaxAntSystem::updateBestSoFarPath()
 {
 		CAntSystem::updateBestSoFarPath();
 		//best in itteration
-		if (m_bestSoFarPathlength < m_restartBestAntTourLength)
+		if (m_BestAntToDate.getAntTourLength() < m_restartBestAntTourLength)
 		{
 				
-				m_restartAntBestPath = getBestTourIrreration();
-				m_restartBestAntTourLength =calculatePathLength(m_restartAntBestPath);// m_bestSoFarPathlength;
-				//irreationSinceLastBest =0;
+			m_restartAntBestPath = m_pBestAntItt->getAntsCityTour();
+			m_restartBestAntTourLength = m_pBestAntItt->getAntTourLength(); calculatePathLength(m_restartAntBestPath);// m_bestSoFarPathlength;
+			irreationSinceLastBest =0;
 		}
 		else 
 		{
-			m_bestIterationLength = m_bestSoFarPathlength;
-			m_bestIterationAntPath = this->getBestTourIrreration();
+		
+			//reset trails
+			m_bestIterationLength = m_BestAntToDate.getAntTourLength();
+			//m_bestIterationAntPath = this->getBestTourIrreration();
 			m_branchingFactor = this->nodeBranching(lambda);
 			double p_x = exp(log(0.05) / m_noNodes);
 			trail_min = 1. * (1. - p_x) / (p_x * (double) ((this->m_noNodes + 1) / 2));
-			trail_max = 1. / ((m_rho) * m_bestIterationLength);
+			trail_max = 1. / ((m_rho) * m_BestAntToDate.getAntTourLength());
 			trail_0 = trail_max;
 			trail_min = trail_max * trail_min;
-			irreationSinceLastBest ++;
+			//irreationSinceLastBest ++;
+		}
 	
-        }
+ //       }
  }
 void CMinMaxAntSystem::initPheromones()
 {
 		std::vector<bool> visited(m_noNodes);
 		std::vector<size_t> nntour(m_noNodes);
-		calculateNearestNeigbhor(20);
+		calculateNearestNeigbhor(m_noNodes);
 		//calculate min max values inital
 		int phase = 0;
 		int rnd= (rand()%(visited.size()-1))+1;
@@ -200,12 +200,14 @@ void CMinMaxAntSystem::updatePheromones()
 	evaporateAllPhero ();	
 	if (this->m_iterations % 25 == 0) //even
 	{
-		globalUpdatePheromone(this->m_bestSoFarPath);  //best to date for even
+		//globalUpdatePheromone(this->m_bestSoFarPath);  //best to date for even
+		globalUpdatePheromone(m_BestAntToDate.getAntsCityTour());  //best to date for even
 	} 
 	else //odd
 	{
 	    if(m_resetAnt)
 		{
+			//globalUpdatePheromone(m_RestartBestAnt.getAntsCityTour());  //best to date for even
 			globalUpdatePheromone(m_restartAntBestPath);
 			/*
 			if(m_RestartBestAnt.getAntTourLength())
@@ -228,15 +230,14 @@ void CMinMaxAntSystem::updatePheromones()
 		}
 	    else
 		{
-			std::vector<size_t> &best = getBestTourIrreration();
-			globalUpdatePheromone(best);
+		//	std::vector<size_t> &best = getBestTourIrreration();
+			globalUpdatePheromone(m_pBestAntItt->getAntsCityTour());
 		}
 	}
 	
 
 			
-	if ((m_iterations % 100) == 0 && irreationSinceLastBest > 175) 
-	//if (irreationSinceLastBest > 100) 
+	if ( irreationSinceLastBest > 150) 	//if (irreationSinceLastBest > 100) 
 	{
 		//create nn_list ..
 		m_branchingFactor = nodeBranching(lambda);
@@ -247,23 +248,19 @@ void CMinMaxAntSystem::updatePheromones()
 //			", irrbest " << calculatePathLength(getBestTourIrreration()) <<
 //				", iteration: "  << m_iterations << ", b_fac " << m_branchingFactor << "avg" << std::endl;
 
-			m_restartBestAntTourLength =  (std::numeric_limits<int>::max)();
+			m_RestartBestAnt.setAntTourLength( (std::numeric_limits<int>::max)());
+			//m_restartBestAntTourLength =  (std::numeric_limits<int>::max)();
 			initPheromoneTrails(trail_max);
 			m_resetAnt = true;
 			irreationSinceLastBest =0;
-			m_RestartBestAnt.setAntTourLength( (std::numeric_limits<int>::max)());
+			//m_RestartBestAnt.setAntTourLength( (std::numeric_limits<int>::max)());
+
+		}
 
 	}
-
-	}
-
 	checkPheromoneLimits();
-
-	this->calculateHeuristicMatrix();
-
-
-
-    
+	calculateHeuristicMatrix();
+   
 }
 /*
 void CMinMaxAntSystem::localSearch()

@@ -14,7 +14,7 @@ CBestWorstAntSystem::CBestWorstAntSystem(Parameters& Par,MatrixArrayTypeInt *dis
 	starttime=GetTickCount();
 	std::vector<bool> visited(m_noNodes);
 	std::vector<size_t> nntour(m_noNodes);
-	calculateNearestNeigbhor(20);
+	calculateNearestNeigbhor(m_noNodes);
 	//calculate min max values inital
 	int phase = 0;
 	int rnd= (rand()%(visited.size()-1))+1;
@@ -37,7 +37,7 @@ void CBestWorstAntSystem::bwas_worst_ant_update( const CAnt &worseA, const CAnt 
     size_t   i, pos, pred;
     unsigned int   distance;
     
-	std::vector<size_t> pos2(m_noNodes+1);
+	std::vector<size_t> pos2(m_noNodes);
 
     for ( i = 0 ; i < bestA.getNoNodes() ; i++ ) 
 	{
@@ -45,7 +45,7 @@ void CBestWorstAntSystem::bwas_worst_ant_update( const CAnt &worseA, const CAnt 
     }
  
     distance = 0;
-    for ( i = 1 ; i < m_noNodes   ; i++ ) 
+    for ( i = 1 ; i < worseA.getNoNodes()   ; i++ ) 
 	{
 		size_t to = worseA.getCity(i);
 		size_t from = worseA.getCity(i-1);
@@ -80,19 +80,14 @@ void CBestWorstAntSystem::bwas_worst_ant_update( const CAnt &worseA, const CAnt 
 long CBestWorstAntSystem::distance_between_ants( const CAnt &worseA, const CAnt &bestA)
 {
 	size_t   i, pos, pred;
-	unsigned int   distance;
+	unsigned int   distance=0;
 
 	std::vector<size_t> pos2(m_noNodes+1);
-
-
-
 	for ( i = 0 ; i < bestA.getNoNodes() ; i++ ) 
 	{
 		pos2[bestA.getCity(i)] = i;
 	}
-
-	distance = 0;
-	for ( i = 1 ; i < m_noNodes   ; i++ ) 
+	for ( i = 1 ; i < bestA.getNoNodes()   ; i++ ) 
 	{
 		size_t to = worseA.getCity(i);
 		size_t from = worseA.getCity(i-1);
@@ -105,8 +100,6 @@ long CBestWorstAntSystem::distance_between_ants( const CAnt &worseA, const CAnt 
 		else
 			pred = pos;
 
-
-
 		size_t bestnextpos = bestA.getCity(pred+1);
 		size_t bestprevpos = bestA.getCity(pred-1);
 
@@ -114,7 +107,8 @@ long CBestWorstAntSystem::distance_between_ants( const CAnt &worseA, const CAnt 
 			; /* do nothing, edge is common with a2 (best solution found so far) */
 		else if (bestprevpos == from)
 			; /* do nothing, edge is common with a2 (best solution found so far) */
-		else {   /* edge (j,h) does not occur in ant a2 */       
+		else 
+		{   /* edge (j,h) does not occur in ant a2 */       
 			distance++;
 
 			//(*m_pheromoneMatrix)[j][h] = (1 - m_rho) * (*m_pheromoneMatrix)[j][h];
@@ -175,7 +169,7 @@ void CBestWorstAntSystem::calculateNearestNeigbhor(unsigned int NUMOFANTS)
 			*(pdistanceArray+i)=(*m_distanceMatrix)[node][i];
 			*(pHelpArray+i)=  i;
 		}
-		double max = (std::numeric_limits<double>::max)() - 1; 
+		//double max = (std::numeric_limits<double>::max)() - 1; 
 		*(pdistanceArray+node) =  (std::numeric_limits<double>::max)();  // set to a large value .. 
 		this->m_pLocalSearch->sort2(pdistanceArray, pHelpArray, 0, static_cast<unsigned int>(m_noNodes - 1));
 		for (i = 0; i < NUMOFANTS; i++) 
@@ -189,8 +183,8 @@ void CBestWorstAntSystem::calculateNearestNeigbhor(unsigned int NUMOFANTS)
 
 void CBestWorstAntSystem::initPheromones() 
 {
-	//initPheromoneTrails(trail_0);
-	CAntSystem::initPheromones();
+	initPheromoneTrails(trail_0);
+	//CAntSystem::initPheromones();
 }
 
 void CBestWorstAntSystem::initPheromoneTrails(double initialValue) const
@@ -200,8 +194,7 @@ void CBestWorstAntSystem::initPheromoneTrails(double initialValue) const
 	c=s;
 	AfxGetMainWnd()->PostMessage(IDC_VERBOSE ,0, (LPARAM)&c);
 	
-	
-	unsigned int i, j;
+	size_t i, j;
 	for (i = 0; i < m_noNodes; i++)
 	{
 		for (j = 0; j <= i; j++) 
@@ -223,24 +216,20 @@ void CBestWorstAntSystem::updatePheromones()
 
 
 	//global_update_pheromone( best_so_far_ant );
-	double d_tau = (double)1/ m_bestSoFarPathlength; 
-	for(size_t city = 1; city <m_bestSoFarPath.size(); city++)
+	double d_tau = (double)1.0/ m_BestAntToDate.getAntTourLength(); 
+	for(size_t city = 1; city <m_BestAntToDate.getNoNodes(); city++)
 	{
-		size_t from = m_bestSoFarPath[city-1];
-		size_t to = m_bestSoFarPath[city];
+		size_t from = m_BestAntToDate.getCity(city-1);
+		size_t to = m_BestAntToDate.getCity(city);
 		this->m_newPheromoneMatrix->add(from,to , d_tau);
 	}
-//	worstIndex = this->computeAntsItterationWorstIndex();
-	//bwas_worst_ant_update
-	const CAnt &BestAnt = GetBestAnt();
-	const CAnt &WorstAnt = getWorstAnt();
 
-	bwas_worst_ant_update( WorstAnt, BestAnt );
-	long distance_best_worst = distance_between_ants( WorstAnt ,BestAnt);
+	bwas_worst_ant_update(*m_pWorstAntItt , m_BestAntToDate );
+	long distance_best_worst = distance_between_ants(m_BestAntToDate,*m_pWorstAntItt );
 	if ( distance_best_worst < (int) (0.05 * (double) m_noNodes) ) 
 	{
-		m_RestartBestAnt.setAntTourLength((std::numeric_limits<int>::max)());
-		initPheromoneTrails( this->m_newPheromoneMatrix->averagePheromoneTrail(m_bestSoFarPath));
+	//	m_RestartBestAnt.setAntTourLength((std::numeric_limits<int>::max)());
+		initPheromoneTrails(trail_0);//this->m_newPheromoneMatrix->averagePheromoneTrail(m_RestartBestAnt.getAntsCityTour()));
 		//CAntSystem::initPheromones();
 		restart_iteration = m_iterations;
 		restart_time = GetTickCount();
@@ -249,6 +238,7 @@ void CBestWorstAntSystem::updatePheromones()
 	{
 		bwas_pheromone_mutation();
 	}
+
 	calculateHeuristicMatrix();
  }
 void CBestWorstAntSystem::bwas_pheromone_mutation( void )
@@ -259,25 +249,16 @@ void CBestWorstAntSystem::bwas_pheromone_mutation( void )
 	double       avg_trail = 0.0,  mutation_rate = 0.3;
 
      /* compute average pheromone trail on edges of global best solution */
-	avg_trail = this->m_newPheromoneMatrix->averagePheromoneTrail(m_bestSoFarPath);
+	avg_trail = this->m_newPheromoneMatrix->averagePheromoneTrail(m_BestAntToDate.getAntsCityTour());
 
-	//mutation_rate = mutation_rate / this->m_noNodes * this->m_noAnts;
-
-    /* determine mutation strength of pheromone matrix */ 
-    /* FIXME: we add a small value to the denominator to avoid any
-       potential division by zero. This may not be fully correct
-       according to the original BWAS. */
-    //if ( max_time > 0.1 )
-
-	//wrong here slowly gets with each irreatio
-	
-	double mutation_strength = 4.0 * (double)avg_trail * (double) (GetTickCount() - restart_time) / (30000- (restart_time + 0.0001));
+		
+	double mutation_strength = 4.0 * (double)avg_trail * (double) (GetTickCount() - restart_time) / (300000- (restart_time + 0.0001));
 	
 
 	mutation_rate = mutation_rate / this->m_noNodes *m_noAnts;
 	num_mutations = (int) (this->m_noNodes * mutation_rate) / 2;
 		
-	//num_mutations = static_cast<long>(m_noNodes * mutation_rate / 2);   
+	
 
     /* / 2 because of adjustment for symmetry of pheromone trails */
  
@@ -296,11 +277,7 @@ void CBestWorstAntSystem::bwas_pheromone_mutation( void )
 		else 
 		{	
 			this->m_newPheromoneMatrix->subtract(j,k , mutation_strength);
-			if ( this->m_newPheromoneMatrix->get(j,k) <= 0.0 ) 
-			{
-				this->m_newPheromoneMatrix->set1(j,k ,0.00000000000000000000000000000001 );
-			}
-			this->m_newPheromoneMatrix->set1(j,k , this->m_newPheromoneMatrix->get(j,k) );
+
 		}
     }
 }

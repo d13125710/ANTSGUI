@@ -42,7 +42,17 @@ public:
 		(*matrix_)[w][v] *= amount;
 	}
 	void subtract(size_t v, size_t  w, double amount){
-		(*matrix_)[v][w] -= amount;
+		if((*matrix_)[v][w] - amount <= 0.0)
+		{
+			(*matrix_)[v][w]=0.00000000000000000000000000000001;
+			(*matrix_)[w][v]=0.00000000000000000000000000000001;
+		}
+		else
+		{
+			(*matrix_)[v][w] -= amount;
+			(*matrix_)[w][v] -= amount;
+		}
+	
 	}
 	void evaporate(size_t v, size_t w) {
 		(*matrix_)[v][w] *= 1 - evaporation_rate_;

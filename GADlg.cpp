@@ -22,7 +22,11 @@ const int bottom_limit = 120;
 
 // CTwoOptDlg dialog
 
-
+static UINT BASED_CODE indicators[] =
+{
+	ID_INDICATOR_NISH,
+	ID_INDICATOR_TIME
+};
 
 
 
@@ -145,7 +149,26 @@ BOOL CTwoOptDlg::OnInitDialog()
 	c_SpinIrrerations.SetRange(1 , 100);
 	c_SpinIrrerations.SetPos(5);
 
-	
+
+	m_bar.Create(this); //We create the status bar
+
+	m_bar.SetIndicators(indicators,2); //Set the number of panes 
+
+	CRect rect;
+	GetClientRect(&rect);
+	//Size the two panes
+	m_bar.SetPaneInfo(0,ID_INDICATOR_NISH, 	SBPS_NORMAL,rect.Width()-100);      
+	m_bar.SetPaneInfo(1,ID_INDICATOR_TIME,SBPS_STRETCH ,0);
+
+	//This is where we actually draw it on the screen
+	RepositionBars(AFX_IDW_CONTROLBAR_FIRST,AFX_IDW_CONTROLBAR_LAST,ID_INDICATOR_TIME);
+
+	CRect progressRect;
+	m_bar.GetItemRect(1, &progressRect);
+	//m_cProgress.MoveWindow(progressRect);
+	//m_cProgress.Create(WS_CHILD | WS_VISIBLE | SBPS_NOBORDERS | PBS_SMOOTH, progressRect, this, -1);
+	m_cProgress.SetRange(0, 100);
+	m_cProgress.SetPos(0);
 	
 
 

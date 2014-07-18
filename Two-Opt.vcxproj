@@ -181,6 +181,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+    <None Include="Report1.rdlc" />
     <None Include="res\GA.ico" />
     <None Include="res\GA.rc2" />
   </ItemGroup>

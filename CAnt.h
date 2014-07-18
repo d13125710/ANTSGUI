@@ -52,9 +52,6 @@ public:
 	void setAntCity(size_t index, size_t city)
 	{
 		//make sure city not already there
-		
-
-		
 		m_antTour[index] = city;
     }
 	size_t getNoNodes() const {
