@@ -186,7 +186,6 @@
     <None Include="res\GA.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="akBufferedDC.h" />
     <ClInclude Include="BestWorstAntSystem.h" />
     <ClInclude Include="CAnt.h" />
     <ClInclude Include="CAntColonySystem.h" />
@@ -211,7 +210,6 @@
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="akBufferedDC.cpp" />
     <ClCompile Include="BestWorstAntSystem.cpp" />
     <ClCompile Include="CAnt.cpp" />
     <ClCompile Include="CAntColonySystem.cpp">

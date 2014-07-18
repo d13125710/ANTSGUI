@@ -91,9 +91,6 @@
     <ClInclude Include="TokenFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="akBufferedDC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -136,9 +133,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Chromo1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="akBufferedDC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
