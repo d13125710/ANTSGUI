@@ -15,10 +15,25 @@ class CLocalSearch
 
 public:
 
+	//************************************
+	// Method:    CLocalSearch
+	// FullName:  CLocalSearch::CLocalSearch
+	// Access:    public 
+	// Returns:   
+	// Qualifier:
+	//************************************
 	CLocalSearch(){
 		m_Vdistance = 0;
 	}
 
+	//************************************
+	// Method:    CLocalSearch
+	// FullName:  CLocalSearch::CLocalSearch
+	// Access:    public 
+	// Returns:   
+	// Qualifier:
+	// Parameter: MatrixArrayTypeInt * Vdistance
+	//************************************
 	CLocalSearch(MatrixArrayTypeInt  *Vdistance){
 		m_Vdistance = Vdistance;
 
