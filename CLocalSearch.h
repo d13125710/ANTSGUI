@@ -169,7 +169,7 @@ public:
    }
 	void greedyAntPath(std::vector<size_t> &tour)
 	{
-		auto noNodes = tour.size()-1;
+		auto noNodes = tour.size();
 		std::vector<bool> visted(noNodes);
 			
 	    int min, node;
@@ -178,7 +178,7 @@ public:
         for(i = 0; i < noNodes; i++)
             visted[i] = false;
 
-        tour[0] = 0;
+       // tour[0] = 0;
      
         visted[0] = true;
 

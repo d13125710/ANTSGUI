@@ -17,6 +17,8 @@ CAntColonySystem::CAntColonySystem(Parameters &Par, MatrixArrayTypeInt *matrix)
 	this->m_noAnts=75;
 	if(m_noNodes <= m_noAnts )
 		m_noAnts = 15;
+
+	//this->m_rho=0.1;
 	
 }
 
@@ -26,27 +28,15 @@ CAntColonySystem::~CAntColonySystem(void)
 }
 void CAntColonySystem::evaporateAllPhero()
 { 
-	CAnt ant = this->getBestAntToDate();
+//	CAnt ant = this->getBestAntToDate();
 
-	for (unsigned int i=1; i < ant.getNoNodes(); i++) 
+	for (unsigned int i=1; i < m_BestAntToDate.getNoNodes(); i++) 
 	{
-		size_t idx1 = ant.getCity(i); //h
-		size_t idx2 = ant.getCity(i-1); //j
-	//	double value = m_newPheromoneMatrix->get(from,to);
-		
-	//	m_newPheromoneMatrix->multipy(from,to, (1. - m_r0) * value + m_r0 * this->m_bestSoFarPathlength);
-
+		size_t idx1 = m_BestAntToDate.getCity(i); //h
+		size_t idx2 = m_BestAntToDate.getCity(i-1); //j
 		m_newPheromoneMatrix->multipy(idx1 , idx2 ,(1-m_r0));
-	////	pheromone[idx1][idx2]*=(1-ro);
-//this->m_newPheromoneMatrix->evaporate(from , to);
-		//this->m_newPheromoneMatrix->evaporate(to , from);
 	}
-//	int idx1 = ant.getCity(ant.getNoNodes()-1); 
-//	int idx2 = ant.getCity(0); 	
-//	m_newPheromoneMatrix->multipy(idx1 , idx2 ,(1-m_r0));
 
-
-	
 }
 /*
 In ACS only the globally best ant (i.e., the ant which constructed the shortest tour from the
@@ -57,113 +47,102 @@ Global updating is performed after all ants have completed their tours. The pher
 is updated by applying the global updating rule of Eq. (4)
 */
 
+
+ //************************************
+ // Method:    globalPheromoneDeposit
+ // FullName:  CAntColonySystem::globalPheromoneDeposit
+ // Access:    public 
+ // Returns:   void
+ // Qualifier:
+ //************************************
  void CAntColonySystem::globalPheromoneDeposit()
 {
-	//this->get
-	CAnt ant = this->getBestAntToDate();
-	//m_bestSoFarPathlength= this->calculatePathLength(ant.getAntsCityTour());
-	//int len = calculatePathLength(getBestTourIrreration());
-  	double d_tau =  1.0 /  ant.getAntTourLength();
-
-	for(size_t i = 1; i < ant.getNoNodes(); i++)
+	
+	double delta = 1.0 / (m_BestAntToDate.getAntTourLength());
+	//dont need last city as added in this tour
+	for(size_t i = 1; i < m_BestAntToDate.getNoNodes(); i++)
 	{ 
-		size_t idx1 = ant.getCity(i); //h
-		size_t idx2 = ant.getCity(i-1); //j
-		double value = this->m_newPheromoneMatrix->get(idx1 , idx2);
-		double updateValue = (1.0 - m_rho) * value + (m_rho * d_tau);
-		//double updateValue = m_r0 * d_tau;
-		//if(value > updateValue) 
-		//	std::cout << "error";
-		//m_newPheromoneMatrix->add(idx1,idx2,updateValue);
-		this->m_newPheromoneMatrix->set( idx1 , idx2 , updateValue);
-	//	double dist = (*m_distanceMatrix)[to][from];
-		
-		//(*m_heuristicMatrix)[from][to] = pow( updateValue,m_alpha) * pow(HEURISTIC(from,to),m_beta);
-		//(*m_heuristicMatrix)[to][from] = (*m_heuristicMatrix)[from][to];
-	}
-	//get last city to first
-	//int idx1 = ant.getCity( ant.getNoNodes() - 1); //h
-	//int idx2 = ant.getCity(0); //j
-	//double value = this->m_newPheromoneMatrix->get(idx1 , idx2);
-	//double updateValue = (1.0 - m_rho) * value + (m_rho * d_tau);
-	//double updateValue = m_r0 * d_tau;
-	//if(value > updateValue) 
-	//	std::cout << "error";
-	//m_newPheromoneMatrix->add(idx1,idx2,updateValue);
-	//this->m_newPheromoneMatrix->set( idx1 , idx2 , updateValue);
+		size_t idx1 = m_BestAntToDate.getCity(i); //h
+		size_t idx2 = m_BestAntToDate.getCity(i-1); //j
+		//localPheromoneEndIndexUpdate(idx1 ,idx2);
+		 this->m_newPheromoneMatrix->add(idx1,idx2 ,(m_r0*delta));
+	//	pheromone[idx1][idx2]+=ro*delta;
+	//	pheromone[idx2][idx1]+=ro*delta;
 
+
+
+	}
 	
 }
+ //************************************
+ // Method:    CalculateHeuristicForNode
+ // FullName:  CAntColonySystem::CalculateHeuristicForNode
+ // Access:    public 
+ // Returns:   void
+ // Qualifier:
+ // Parameter: size_t i
+ // Parameter: size_t j
+ //************************************
+ void CAntColonySystem::CalculateHeuristicForNode(size_t i, size_t j)
+ {
+	 double xx = m_newPheromoneMatrix->get(i,j);
+	 double yy = (*m_distanceMatrix)[i][j];
+	 (*m_heuristicMatrix)[i][j] = abs(pow( xx , m_alpha) * pow(HEURISTIC(i,j),m_beta));
+ }
+ //************************************
+ // Method:    localPheromoneEndIndexUpdate
+ // FullName:  CAntColonySystem::localPheromoneEndIndexUpdate
+ // Access:    public 
+ // Returns:   void
+ // Qualifier:
+ // Parameter: size_t idx1
+ // Parameter: size_t idx2
+ //************************************
+ void CAntColonySystem::localPheromoneEndIndexUpdate(size_t idx1, size_t idx2)
+ {
+	 double currentValue = this->m_newPheromoneMatrix->get(idx1, idx2);
+	 double updateValue =  (1.0-xi)*currentValue+xi*tau0;
+	 this->m_newPheromoneMatrix->set(idx1, idx2 , updateValue);
+	 CalculateHeuristicForNode(idx1, idx2);
+ }
+ //************************************
+ // Method:    localPheromoneUpdate
+ // FullName:  CAntColonySystem::localPheromoneUpdate
+ // Access:    public 
+ // Returns:   void
+ // Qualifier:
+ // Parameter: size_t ant
+ // Parameter: size_t step
+ //************************************
  void CAntColonySystem::localPheromoneUpdate(size_t ant, size_t step)
  {
 	 size_t idx1 = this->m_Ants[ant].getCity(step);
 	 size_t idx2 = m_Ants[ant].getCity(step-1);
-	 double currentValue = this->m_newPheromoneMatrix->get(idx1, idx2);
-	 double updateValue =  (1.0 - xi) * currentValue + xi * tau0;
-	 this->m_newPheromoneMatrix->set(idx1, idx2 , updateValue);
-	 double dist = (*m_distanceMatrix)[idx1][idx2];
-	 (*m_heuristicMatrix)[idx1][idx2] = pow( updateValue,m_alpha) * pow(HEURISTIC(idx1,idx2),m_beta);
-	 (*m_heuristicMatrix)[idx2][idx1] = (*m_heuristicMatrix)[idx1][idx2];
+	 localPheromoneEndIndexUpdate(idx1, idx2);
  } 
 
 void CAntColonySystem::updateBestSoFarPath()
 {
 	CAntSystem::updateBestSoFarPath();
-	/*
-	//find best ant
-	CAnt *pAnt=0;
-	int best_distance=(std::numeric_limits<int>::max)();
-	for(unsigned int i = 0; i < this->m_Ants.size(); i++)
-	{
-		int currentL = (int) calculatePathLength(m_Ants[i].getAntsCityTour());
-		if(currentL < best_distance)
-		{
-			best_distance = currentL;
-			pAnt = &m_Ants[i];
-
-		}
-	}
-	//pAmt is the best ant;
-	
-	if(best_distance < m_bestSoFarPathlength )
-	{
-
-		for(unsigned int j = 0; j < pAnt->getNoNodes(); j++)
-		{
-			m_bestSoFarPath[j] = pAnt->getCity(j);
-
-		}
-
-		m_bestSoFarPathlength = best_distance;
-
-	}
-
-	*/
 
 }
 //no need
 void CAntColonySystem::calculateHeuristicMatrix()
 {
    // CAntSystem::calculateHeuristicMatrix();
-	
-	for(unsigned int i = 0; i < m_noNodes; i++)
-		for(unsigned int j = 0; j < m_noNodes; j++)
+
+	for(size_t i = 0; i < m_noNodes; i++)
+		for(size_t j = 0; j <m_noNodes; j++)
 		{
-			double xx = m_newPheromoneMatrix->get(i,j);
-			double yy = (*m_distanceMatrix)[i][j];
-			(*m_heuristicMatrix)[i][j] = pow( xx , m_alpha) * pow(HEURISTIC(i,j),m_beta);
-			(*m_heuristicMatrix)[j][i] = (*m_heuristicMatrix)[i][j];
+			CalculateHeuristicForNode(i, j);
 		}	
-
-
 }
 void CAntColonySystem::updatePheromones()
 { 
 	
-	//evaporateAllPhero(); //this
+//	evaporateAllPhero(); //this
 	//this->m_newPheromoneMatrix->evaporate_all();
 	globalPheromoneDeposit();
-
 	calculateHeuristicMatrix();
 }
 
@@ -172,44 +151,42 @@ void CAntColonySystem::updatePheromones()
 void CAntColonySystem::initPheromones()
 {
 
-
-	//calculateNearestNeigbhor(m_noNodes);
-	//calculate min max values inital
 	double best_distance = (std::numeric_limits<double>::max)();
-
-
 	for(int i =0 ; i < m_noNodes; i++)
 	{
 		
-		std::vector<size_t> randomPath(m_noNodes+1);
+		std::vector<size_t> randomPath(m_noNodes);
 		for (size_t i=0; i<m_noNodes; i++)
 			randomPath[i]=i;
 		
-		randomPath[m_noNodes]=0;
-
-		std::random_shuffle( randomPath.begin()+1 , randomPath.end()-1);
-
-		//std::random_shuffle( m_randomPath.begin() , m_randomPath.end() );
-
+		std::random_shuffle( randomPath.begin() , randomPath.end());
 		m_pLocalSearch->greedyAntPath(randomPath);
-	//	m_pLocalSearch->opt3(m_randomPath);
+			m_pLocalSearch->opt3(randomPath);
 		double dist=this->calculatePathLength(randomPath);
+	
 		if(dist < best_distance  )
 		{
+		
 			m_BestAntToDate.setAntsTour(randomPath);
-			m_BestAntToDate.setAntTourLength(dist);
-			//m_bestSoFarPath = randomPath;
+			m_BestAntToDate.setAntTourLength(calculatePathLength(randomPath));
 			best_distance = dist;
-
 		}
+	}
+	m_BestAntToDate.getAntsCityTour().resize(m_noNodes+1);
+	size_t index = m_BestAntToDate.getCity(0);
+	m_BestAntToDate.setAntCity(m_noNodes , index );
 
 
+	tau0 = 1.0/ ((double)m_noAnts * best_distance);
 
+	for (size_t  i=0; i<m_noNodes; i++)	
+	{
+		for (size_t j=0; j< m_noNodes; j++)
+			this->m_newPheromoneMatrix->set(i, j , tau0);
 	}
 
-
-
-
+	for(size_t i = 0; i < m_noNodes; i++)
+		m_newPheromoneMatrix->set(i , i , 0);
 
 		
 //	m_pLocalSearch->opt3(nntour);
@@ -219,6 +196,8 @@ void CAntColonySystem::initPheromones()
 
 	//m_bestSoFarPathlength=this->calculatePathLength(m_bestSoFarPath);
 	//this->m_bestSoFarPathlength = (int)lenght;
+
+	/*
 	tau0 = 1/ ((double)m_noNodes * best_distance);
 
 	for (unsigned int i=0; i<m_noNodes; i++)	
@@ -226,7 +205,7 @@ void CAntColonySystem::initPheromones()
 		for (unsigned int j=0; j< m_noNodes; j++)
 			this->m_newPheromoneMatrix->set(i, j , tau0);
 	}
-
+	*/
 	//min max
 
 	std::vector<bool> visited(m_noNodes);
@@ -258,14 +237,11 @@ void CAntColonySystem::initPheromones()
 
 	for(i = 0; i < m_noNodes; i++)
 		m_newPheromoneMatrix->set(i , i , 0);
-
-
-
-
-//	for(unsigned int i=0;i<this->m_noNodes;i++)
-//		this->m_newPheromoneMatrix->set(i, i , 0.0);
+	for(unsigned int i=0;i<this->m_noNodes;i++)
+		this->m_newPheromoneMatrix->set(i, i , 0.0);
 
 //	this->updateBestSoFarPath();
+
 }
 /*
 The procedure works as follows: first, the current city c of ant k is determined
@@ -301,14 +277,9 @@ void CAntColonySystem::decisionRule(size_t k, size_t step)
 			}
 		}
 		//test
-		if (sum_prob <= 0.0) {
-			/* All cities from the candidate set are tabu */
-			choose_best_next( m_Ants[k], step );
-		}     
+		//m_strength[m_noNodes]=0;
 
-
-//		m_strength[m_noNodes+1]=0;
-	//	strength[0] = 0;	
+	
 		for (size_t z =0; z < m_noNodes; z++)
 			m_strength[z+1] = t_prob[z] + m_strength[z];
 				
@@ -373,7 +344,7 @@ void CAntColonySystem::constructSolutions()
 	initAnts();
 	 
 	//place ants in ramdom citys for starting
-	for (int k = 0; k < m_noAnts; k++ )
+	for (int k = 0; k <  m_Ants.size(); k++ )
 	{
 		m_Ants[k].setAntCity(0,m_randomPath[k]);
 		m_Ants[k].setCityVisited(m_randomPath[k]);
@@ -384,28 +355,39 @@ void CAntColonySystem::constructSolutions()
 	{
 		for(size_t k = 0; k < m_Ants.size(); k++)
 		{
-			decisionRule2(k,step);
+			decisionRule(k,step);
 			localPheromoneUpdate(k,step);
 		
 		}
 	}
      
-	for(int k = 0; k < m_noAnts; k++)
+	for(int k = 0; k <  m_Ants.size(); k++)
 	{
 		int tourstart=m_Ants[k].getCity(0);
 		m_Ants[k].setAntCity(m_noNodes,tourstart);
 	
-		const std::vector<size_t>& tourvector = m_Ants[k].getAntsCityTour();
-		m_Ants[k].setAntTourLength((int)calculatePathLength(tourvector));
+		//const std::vector<size_t>& tourvector = m_Ants[k].getAntsCityTour();
+		//m_Ants[k].setAntTourLength((int)calculatePathLength(tourvector));
+		//update the ant
+		m_Ants[k].setAntTourLength((int)this->calculateAntPathLength(m_Ants[k]));
+
+
 	
-		size_t idx1 = this->m_Ants[k].getCity(0);
+		size_t idx1 = this->m_Ants[k].getCity(m_noNodes);
 		size_t idx2 = m_Ants[k].getCity(m_noNodes-1);
-		double currentValue = this->m_newPheromoneMatrix->get(idx1, idx2);
-		double updateValue =  (1.0 - xi) * currentValue + xi * tau0;
-		this->m_newPheromoneMatrix->set(idx1, idx2 , updateValue);
-		double dist = (*m_distanceMatrix)[idx1][idx2];
-		(*m_heuristicMatrix)[idx1][idx2] = pow( updateValue,m_alpha) * pow(HEURISTIC(idx1,idx2),m_beta);
-		(*m_heuristicMatrix)[idx2][idx1] = (*m_heuristicMatrix)[idx1][idx2];
+		localPheromoneEndIndexUpdate(idx1, idx2);
+
+		
+		//double dist = (*m_distanceMatrix)[idx1][idx2];
+
+		//double xx = m_newPheromoneMatrix->get(i,j);
+		//double yy = (*m_distanceMatrix)[idx1][idx2];
+		
+		//(*m_heuristicMatrix)[i][j] =(double) (yy) ?  abs(pow( xx , m_alpha) * pow(yy,m_beta)) :  abs(pow( xx , m_alpha) * pow(1,m_beta));
+
+
+	//	(*m_heuristicMatrix)[idx1][idx2] = pow( updateValue,m_alpha) * pow(HEURISTIC(idx1,idx2),m_beta);
+	//	(*m_heuristicMatrix)[idx2][idx1] = (*m_heuristicMatrix)[idx1][idx2];
 
 
 

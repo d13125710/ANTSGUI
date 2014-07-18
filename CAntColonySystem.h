@@ -15,9 +15,15 @@ class CAntColonySystem :
 public:
 
 	virtual void constructSolutions();
+
+	void localPheromoneEndIndexUpdate(size_t idx1, size_t idx2);
 	virtual void updateBestSoFarPath();
 	virtual void updatePheromones();
 	virtual void calculateHeuristicMatrix();
+
+	void CalculateHeuristicForNode(size_t i, size_t j);
+	
+
 	virtual void decisionRule(size_t k, size_t step);
 	virtual void evaporateAllPhero();
 
