@@ -10,7 +10,7 @@ string
 #include <string>
 #include "afxdialogex.h"
 #include "MakeString.h"
-#include "akBufferedDC.h"
+
 
 #include "Utils.h"
 
