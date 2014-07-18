@@ -14,9 +14,9 @@ CAntColonySystem::CAntColonySystem(Parameters &Par, MatrixArrayTypeInt *matrix)
     this->q0 =Par.q0;
 	this->m_r0 = Par.r0;
     this->tau0 = 0;
-	this->m_noAnts=75;
+	this->m_noAnts=30;
 	if(m_noNodes <= m_noAnts )
-		m_noAnts = 15;
+		m_noAnts = 30;
 
 	//this->m_rho=0.1;
 	
@@ -88,6 +88,7 @@ is updated by applying the global updating rule of Eq. (4)
 	 double xx = m_newPheromoneMatrix->get(i,j);
 	 double yy = (*m_distanceMatrix)[i][j];
 	 (*m_heuristicMatrix)[i][j] = abs(pow( xx , m_alpha) * pow(HEURISTIC(i,j),m_beta));
+	 (*m_heuristicMatrix)[j][i] =  (*m_heuristicMatrix)[i][j] ;
  }
  //************************************
  // Method:    localPheromoneEndIndexUpdate
@@ -121,9 +122,9 @@ is updated by applying the global updating rule of Eq. (4)
 	 localPheromoneEndIndexUpdate(idx1, idx2);
  } 
 
-void CAntColonySystem::updateBestSoFarPath()
+bool CAntColonySystem::updateBestSoFarPath()
 {
-	CAntSystem::updateBestSoFarPath();
+	return CAntSystem::updateBestSoFarPath();
 
 }
 //no need
@@ -210,7 +211,7 @@ void CAntColonySystem::initPheromones()
 
 	std::vector<bool> visited(m_noNodes);
 	std::vector<size_t> nntour(m_noNodes+1);
-	calculateNearestNeigbhor(m_noNodes);
+	calculateNearestNeigbhor(15);
 	//calculate min max values inital
 	int phase = 0;
 	int rnd= (rand()%(visited.size()-1))+1;
@@ -355,7 +356,7 @@ void CAntColonySystem::constructSolutions()
 	{
 		for(size_t k = 0; k < m_Ants.size(); k++)
 		{
-			decisionRule(k,step);
+			decisionRule2(k,step);
 			localPheromoneUpdate(k,step);
 		
 		}
@@ -449,7 +450,7 @@ void CAntColonySystem::decisionRule2(size_t k, size_t phase)
 
 		current_city = tour[phase - 1]; /* current_city city of ant k */
 		assert (current_city >= 0 && current_city < m_noNodes);
-		for (int i = 0; i < m_noAnts; i++) 
+		for (int i = 0; i < m_nnList[current_city].size(); i++) 
 		{
 				if (a.isCityVisited(m_nnList[current_city][i]))
 				{
@@ -628,7 +629,7 @@ void CAntColonySystem::choose_best_next(CAnt& a, size_t phase)
 	current_city = a.getAntsCityTour()[phase - 1];
 	
 	value_best = -1.; /* values in total matix are always >= 0.0 */
-	for (i = 0; i < this->m_noAnts; i++) 
+	for (i = 0; i < m_nnList[current_city].size(); i++) 
 	{
 	    help_city = this->m_nnList[current_city][i];
 	    if (a.isCityVisited(help_city))

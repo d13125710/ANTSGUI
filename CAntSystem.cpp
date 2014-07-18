@@ -333,10 +333,11 @@ void CAntSystem::calculateHeuristicMatrix()
 // Returns:   void
 // Qualifier:
 //************************************
-void CAntSystem::updateBestSoFarPath()
+bool CAntSystem::updateBestSoFarPath()
 {
 
 	//find the worst ant , best ant , and
+	bool bFoundUpdate =false;
 	int pathdistance =(std::numeric_limits<int>::max)();
 	int worstdistance = 0;
 	
@@ -360,6 +361,7 @@ void CAntSystem::updateBestSoFarPath()
 		std::string s =std::string(format("Restart best Ants %d @ %d" , m_RestartBestAnt.getAntTourLength() ,m_iterations));
 		static string c;c=s;
 		AfxGetMainWnd()->PostMessage(IDC_VERBOSE ,0, (LPARAM)&c);
+		bFoundUpdate = true;
 
 	}
 
@@ -369,79 +371,20 @@ void CAntSystem::updateBestSoFarPath()
 		std::string s =format("Worst Ant to date found  %f  @ %d",m_WorstAntToDate.getAntTourLength() ,m_iterations);
 		static string c; c=s;
 		AfxGetMainWnd()->PostMessage(IDC_VERBOSE ,0, (LPARAM)&c);
+		bFoundUpdate=true;
 	}
 	if(m_pBestAntItt->getAntTourLength() < m_BestAntToDate.getAntTourLength())
 	{
 		m_BestAntToDate = *m_pBestAntItt;
 		irreationSinceLastBest=0;
+		bFoundUpdate =true;
 	}
 	else
 	{
 		irreationSinceLastBest++;
 	}
 
-
-
-		
-	
-	
-	/*double distance=  this->calculatePathLength(m_bestSoFarPath);
-	//	int bestitter = computeAntsItterationBestIndex() ;
-//		if(distance == 0 || this->m_iterations ==0)
-//		{
-m_bestSoFarPath = getBestTourIrreration();
-m_bestSoFarPathlength = computeAntsItterationBestIndex() ;
-			irreationSinceLastBest=0;
-			m_bestAntToDate = m_Ants[BestAntIndex];
-		}
-        else if(bestitter < distance)
-		{
-			irreationSinceLastBest=0;
-			m_bestSoFarPathlength = bestitter;
-			m_bestSoFarPath = getBestTourIrreration();
-			m_bestAntToDate = m_Ants[BestAntIndex];
-
-        }
-		else
-		{
-			irreationSinceLastBest++;
-		}
-
-		if(bestitter < m_RestartBestAnt.getAntTourLength() )
-		{
-			m_RestartBestAnt.setAntTourLength(bestitter);
-			m_RestartBestAnt.setAntsTour(getBestTourIrreration());
-
-			std::string s =std::string(format("Restart best Ants %d @ %d" , bestitter ,m_iterations));
-			static string c;
-			c=s;
-
-			AfxGetMainWnd()->PostMessage(IDC_VERBOSE ,0, (LPARAM)&c);
-		}
-		//get the worst ant for Itteration
-		int worstIrr = this->computeAntsItterationWorstIndexAndLength();
-
-
-				
-		if(worstIrr > m_worstSoFarPathlength)
-		{
-			m_worstSoFarPathlength = worstIrr;
-			//get the wost ant to date;
-			m_worstSoFarPath = getWorstTourIrreration();
-			std::string s =format("Worst Ant to date found  %f  @ %d",m_worstSoFarPathlength ,m_iterations);
-			static string c;
-			c=s;
-			AfxGetMainWnd()->PostMessage(IDC_VERBOSE ,0, (LPARAM)&c);
-		
-		}
-		
-
-
-	*/	
-
-
-
-
+	return bFoundUpdate;
 }
 
 

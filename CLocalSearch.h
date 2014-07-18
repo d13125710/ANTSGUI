@@ -444,7 +444,7 @@ public:
 							if (j >= N-1)
 								j = 0;
 						}
-						//tour[N] = tour[0];
+						tour[N] = tour[0];
 					}
 				} else {
 					dlb[c1] = true;

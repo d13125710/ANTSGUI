@@ -119,7 +119,7 @@ public:
 
 	//virtual
 	virtual void constructSolutions();
-	virtual void updateBestSoFarPath();
+	virtual bool updateBestSoFarPath();
 	virtual void updatePheromones();
 	virtual void calculateHeuristicMatrix();
 

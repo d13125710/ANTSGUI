@@ -17,7 +17,7 @@ public:
 	virtual void constructSolutions();
 
 	void localPheromoneEndIndexUpdate(size_t idx1, size_t idx2);
-	virtual void updateBestSoFarPath();
+	virtual bool updateBestSoFarPath();
 	virtual void updatePheromones();
 	virtual void calculateHeuristicMatrix();
 
