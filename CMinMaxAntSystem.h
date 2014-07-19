@@ -13,37 +13,29 @@
 #include "CLocalSearch.h"
 
 
-
-
 class CMinMaxAntSystem: public CAntSystem
 {
 private:
+
 	double m_tau0;
-	bool m_doLocalSearch , m_doOpt2 , m_doOpt3;
- //   int m_maxStagnationIterations , m_stagnationIterations;
-	double lambda;
-	double  m_branchingFactor;
-	double  trail_0;
-	double trail_max;
-	double	trail_min;
+	double m_lambda;
+	double  m_trail_0;
+	double  m_trail_max;
+	double	m_trail_min;
 	bool m_resetAnt;
 	double m_restartBestAntTourLength;
-	//double m_bestIterationLength;
-	
 	std::vector<size_t> m_restartAntBestPath;
 
-	
-	//added
 private:
+
 	void initPheromoneTrails(double initialValue) const;
 	void globalUpdatePheromone(const std::vector<size_t> &AntTour);
- 	void chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour);
-	double nodeBranching(double l) const;
-
+ 	double nodeBranching(double l) const;
+	virtual bool updateBestSoFarPath();
 
 public:
-	virtual bool updateBestSoFarPath();
-	void initPheromones();
+	
+	virtual void initPheromones();
 	void checkPheromoneLimits();
 	void updatePheromones();
 	CMinMaxAntSystem(Parameters& Par , std::vector<std::vector<int> >  *Vdistance);

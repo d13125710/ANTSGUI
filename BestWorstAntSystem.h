@@ -13,8 +13,6 @@ class CBestWorstAntSystem :
 	DWORD restart_time;
 	DWORD starttime;
 
-	std::vector<std::vector<int> > m_nnList;
-
 public:
 	CBestWorstAntSystem(Parameters &Par, MatrixArrayTypeInt *distanceMatrix);
 	virtual ~CBestWorstAntSystem(void);

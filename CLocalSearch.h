@@ -66,12 +66,8 @@ public:
 		}
     }
 
-	   void opt3(std::vector<size_t> &tour){
-
-	//	tour.resize(tour.size()+1);
-	//	tour[tour.size()-1]= tour[0];
-	
-
+	   void opt3(std::vector<size_t> &tour)
+	   {
 
         size_t i,j;
         int distances[]={0,0,0,0,0,0};
@@ -125,9 +121,7 @@ public:
             }
             
         }
-		//tour.resize(tour.size()-1);
-
-    }
+	}
     void swapV(std::vector<size_t> &tour , size_t i, size_t j)
 	{
         size_t swap = tour[i];
@@ -135,10 +129,10 @@ public:
         tour[j] = swap;
     }
 
-	std::vector<int> greedyPath(int noNodes)
+	std::vector<size_t> greedyPath(int noNodes)
 	{
         std::vector<bool> visted(noNodes);
-		std::vector<int> tour(noNodes+1);
+		std::vector<size_t> tour(noNodes+1);
 		
 	    int min, node;
         int i,j;
@@ -164,41 +158,10 @@ public:
             tour[i] = node;
             visted[node] = true;
         }
-	//   tour[noNodes] = tour[0];
+	   tour[noNodes] = tour[0];
        return tour;
    }
-	void greedyAntPath(std::vector<size_t> &tour)
-	{
-		auto noNodes = tour.size();
-		std::vector<bool> visted(noNodes);
-			
-	    int min, node;
-        int i,j;
-
-        for(i = 0; i < noNodes; i++)
-            visted[i] = false;
-
-       // tour[0] = 0;
-     
-        visted[0] = true;
-
-        for(i = 1; i < noNodes; i++){
-            min = (std::numeric_limits<int>::max)();
-            node = -1;
-            for(j = 0; j < noNodes; j++){
-                if((!visted[j])&&(j!=tour[i-1])){
-                    if(min > (*m_Vdistance)[tour[i-1]][j]){
-                       min = (*m_Vdistance)[tour[i-1]][j];
-                       node = j;
-                    }
-                }
-            }
-            tour[i] = node;
-            visted[node] = true;
-        }
-      //tour[noNodes] = tour[0];
-   }
-
+	//from thomas strudlez
 	 void swap2(double *v, int *v2, int i, int j)
     /*
      * FUNCTION: auxiliary routine for sorting an integer array

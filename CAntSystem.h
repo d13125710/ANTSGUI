@@ -21,11 +21,12 @@ using namespace std;
 
 class CAntSystem
 {
-	bool m_bLocalSearch , m_LocalSearchOpt2 , m_LocalSearchOpt3 , m_LocalSearchGreed;
+
 	
 	void calculateNearestNeigbhor(unsigned int NUMOFANTS=20);
 
 protected:
+	bool m_bLocalSearch , m_LocalSearchOpt2 , m_LocalSearchOpt3 , m_LocalSearchGreed;
 	std::mt19937 g_rndTravel;
 	CAnt m_RestartBestAnt;
 	PheroMatrix *m_newPheromoneMatrix;
@@ -35,13 +36,11 @@ protected:
 	CAnt m_BestAntToDate;
 	CAnt *m_pWorstAntItt, *m_pBestAntItt;
 
-
 	MatrixArrayTypeDouble *m_heuristicMatrix;
 	MatrixArrayTypeInt  *m_distanceMatrix;
 	long irreationSinceLastBest;
 	
 
-	
 	std::vector<CAnt> m_Ants;
 	std::vector<size_t> m_randomPath;
 	std::vector<double> t_prob;
@@ -132,15 +131,13 @@ protected:
 	// Qualifier:
 	//************************************
 public:
+
 	void localSearch()
 	{
-
-		//double length1 = this->calculatePathLength(m_Ants[i].getAntsCityTour());
 
 		if(m_LocalSearchOpt2)
 			for(int i = 0; i < m_Ants.size(); i++)
 			{
-				
 				m_pLocalSearch->opt2(m_Ants[i].getAntsCityTour());
 				m_Ants[i].setAntTourLength((int)this->calculateAntPathLength(m_Ants[i]));
 			}
@@ -156,9 +153,6 @@ public:
 				m_pLocalSearch->three_opt_first(m_Ants[i].getAntsCityTour() , m_nnList);
 				m_Ants[i].setAntTourLength((int)this->calculateAntPathLength(m_Ants[i]));
 			}
-
-		//double length2 = calculatePathLength(m_Ants[i].getAntsCityTour());
-
 
 		updateBestSoFarPath();
 	}

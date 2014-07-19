@@ -12,18 +12,17 @@ CBestWorstAntSystem::CBestWorstAntSystem(Parameters& Par,MatrixArrayTypeInt *dis
 	Restart =0;
 	restart_iteration =1;
 	starttime=GetTickCount();
-	std::vector<bool> visited(m_noNodes);
-	std::vector<size_t> nntour(m_noNodes);
-	calculateNearestNeigbhor(m_noNodes);
-	//calculate min max values inital
-	int phase = 0;
-	int rnd= (rand()%(visited.size()-1))+1;
-	nntour[0] =rnd;
-	visited[rnd] = true;
-	chooseClosestNext(visited, nntour);
-	double distance = this->calculatePathLength( nntour);
-	trail_0 = 1. /distance;
+	std::vector<size_t>  randomPath = m_pLocalSearch->greedyPath(m_noNodes);
+	m_BestAntToDate.setAntsTour(randomPath);
+	if(m_LocalSearchOpt2)
+		m_pLocalSearch->opt2(m_BestAntToDate.getAntsCityTour());
+	else if(m_LocalSearchOpt3)
+		m_pLocalSearch->opt3(m_BestAntToDate.getAntsCityTour());
+	else if(m_LocalSearchGreed)
+		m_pLocalSearch->three_opt_first(m_BestAntToDate.getAntsCityTour() , m_nnList);
 
+	m_BestAntToDate.setAntTourLength(this->calculateAntPathLength(m_BestAntToDate));
+	trail_0 = 1. / (m_BestAntToDate.getAntTourLength());
 }
 /*    
       FUNCTION:      uses additional evaporation on the arcs of iteration worst
