@@ -15,9 +15,10 @@
 // Parameter: Parameters & Par
 // Parameter: MatrixArrayTypeInt * distanceMatrix
 //************************************
-CAntSystem::CAntSystem(Parameters& Par, MatrixArrayTypeInt *distanceMatrix)
+CAntSystem::CAntSystem(Parameters& Par, MatrixArrayTypeInt *distanceMatrix) : 
+	m_distanceMatrix(distanceMatrix) 
 {
-	m_distanceMatrix = distanceMatrix;
+	//m_distanceMatrix = distanceMatrix;
 	Create(Par);
    
 }
@@ -41,18 +42,16 @@ void CAntSystem::Create(Parameters& Par)
 	m_LocalSearchOpt2 = Par.LocalSearchOpt2;
 	m_LocalSearchOpt3 = Par.LocalSearchOpt3;
 	m_LocalSearchGreed = Par.LocalSearchGreed;
+	this->m_iterations = 0;
 	irreationSinceLastBest=0;
+
 	m_RestartBestAnt.setAntTourLength(0);
-//	worseindex=-1;
+
 	m_pLocalSearch = new CLocalSearch(m_distanceMatrix);
-    this->m_iterations = 0;
-	//m_doOpt3
+ 
 	m_heuristicMatrix= new std::vector<std::vector<double> >(m_noNodes , m_noNodes);
-	//test
 	m_newPheromoneMatrix = new PheroMatrix(m_noNodes,m_rho);
 
-//	m_bestSoFarPath.resize(m_noNodes+1);
-//	m_worstSoFarPath.resize(m_noNodes+1);
 
 	m_Ants.empty();
 	m_Ants.resize(m_noAnts-1);
@@ -62,10 +61,6 @@ void CAntSystem::Create(Parameters& Par)
 		m_Ants[i] = newAnt;
 	}
 	
-//	m_bestIrrPath.resize(m_noNodes+1);  //refactor
-//	m_worstIrrPath.resize(m_noNodes+1);
-
-
 
 	m_randomPath.resize(m_noNodes);
 	for (size_t i=0; i<m_noNodes; i++)
@@ -75,15 +70,12 @@ void CAntSystem::Create(Parameters& Par)
 	t_prob.resize(m_noNodes);
 	m_strength.resize(m_noNodes+1);
 	
-	//set the lenths of the paths
-//	m_bestSoFarPathlength = (std::numeric_limits<int>::max)();
-//	m_worstSoFarPathlength =0;
-
-
 	//new
 	m_RestartBestAnt.setAntTourLength( (std::numeric_limits<int>::max)());
 	m_WorstAntToDate.setAntTourLength(0);
 	m_BestAntToDate.setAntTourLength((std::numeric_limits<int>::max)());
+
+	calculateNearestNeigbhor();
 
 
 }
@@ -126,7 +118,7 @@ void CAntSystem::initMatrix(std::vector<std::vector<int> > &distanceMatrix)
 }
  void CAntSystem::initPheromones()
 {
-	
+
 	for (size_t i=0; i<m_noNodes; i++)	{
 		for (size_t j=0; j<m_noNodes; j++)
 			m_newPheromoneMatrix->set(i,j, (0.1 * rand() / (double)RAND_MAX));
@@ -145,19 +137,14 @@ void CAntSystem::adjustPheremone(size_t antPos)
 {
 	const CAnt &pant=m_Ants[antPos];
 	double tour_length = (double) (1.0 / pant.getAntTourLength());
-	//double tour_length = 1 / calculatePathLength(pant.getAntsCityTour()); 
 	for(size_t city = 0; city < pant.getNoNodes()-1; city++)
-	 {
+	{
 	      
 		size_t from = m_Ants[antPos].getCity(city);
 		size_t to   = m_Ants[antPos].getCity(city+1);
 		// eq 14.2 / 14.3
 		m_newPheromoneMatrix->add(from , to , tour_length );	
-  }
-//	size_t from = m_Ants[antPos].getCity(m_noNodes-1);
-//	size_t to   = m_Ants[antPos].getCity(0);
-	// eq 14.2 / 14.3
-//	m_newPheromoneMatrix->add(from , to , tour_length );	
+	}
 
 }
 
@@ -170,7 +157,7 @@ void CAntSystem::adjustPheremone(size_t antPos)
 // Parameter: size_t k
 // Parameter: size_t step
 //************************************
-void CAntSystem::decisionRule(size_t k, size_t step)
+void CAntSystem::decisionRule(size_t k, size_t step, uniform_real<double> &rndSelTrsh)
 {
 	size_t c = m_Ants[k].getCity(step-1); 
 	for (size_t i=0; i < m_noNodes; i++) 
@@ -192,7 +179,9 @@ void CAntSystem::decisionRule(size_t k, size_t step)
 	}
 	for (size_t z =0; z < m_noNodes; z++)
 		m_strength[z+1] = t_prob[z] + m_strength[z];
-	double x = fRand(0,  m_strength[m_noNodes]);
+	
+	double x = rndSelTrsh(g_rndTravel) * m_strength[m_noNodes];
+//	double x = fRand(0,  m_strength[m_noNodes]);
 	int y = 0;
 	//while (  y !=m_strength.size() && !((m_strength[y] <= x) && (x <= m_strength[y+1])) )
 	while (!((m_strength[y] <= x) && (x <= m_strength[y+1])) )
@@ -214,6 +203,7 @@ void CAntSystem::decisionRule(size_t k, size_t step)
 void CAntSystem::constructSolutions()
 {
 	initAnts();
+
 	   
 	for (size_t k = 0; k < m_Ants.size(); k++ )
 	{
@@ -221,11 +211,12 @@ void CAntSystem::constructSolutions()
 		m_Ants[k].setCityVisited(m_randomPath[k]);
 
 	}
+	uniform_real<double> rndSelTrsh(0.0, 1);
 
 	for(size_t step = 1 ; step < m_noNodes; step++)
 	{
 		for(size_t k = 0; k < m_Ants.size(); k++)
-			decisionRule(k,step);
+			decisionRule(k,step, rndSelTrsh);
 	}
     //add in the last city to the first city tour ...  
 	for(size_t k = 0; k < m_Ants.size(); k++)
@@ -233,49 +224,10 @@ void CAntSystem::constructSolutions()
 			
 		size_t tourstart=m_Ants[k].getCity(0);
 		m_Ants[k].setAntCity(m_noNodes,tourstart);
-	//	const std::vector<size_t>& tourvector = m_Ants[k].getAntsCityTour();
-	//	m_Ants[k].setAntTourLength((int)calculatePathLength(tourvector));
 		m_Ants[k].setAntTourLength((int)this->calculateAntPathLength(m_Ants[k]));
 	}
 	updateBestSoFarPath();
 }
-
-//************************************
-// Method:    getBestTourIrreration
-// FullName:  CAntSystem::getBestTourIrreration
-// Access:    public 
-// Returns:   std::vector<size_t> &
-// Qualifier:
-//************************************
-//std::vector<size_t> &CAntSystem::getBestTourIrreration()
-//{
-   
-	//return m_pBestAntItt->getAntsCityTour();
-	//int bestTourLength = (std::numeric_limits<int>::max)();
-	//for(size_t j = 0; j < m_noNodes; j++)
-	//{
-	//	m_bestIrrPath[j] = m_Ants[BestAntIndex].getCity(j);
-	//}
-    //return m_bestIrrPath;
-//}
-//************************************
-// Method:    getWorstTourIrreration
-// FullName:  CAntSystem::getWorstTourIrreration
-// Access:    public 
-// Returns:   std::vector<size_t> &
-// Qualifier:
-//************************************
-/*
-std::vector<size_t> &CAntSystem::getWorstTourIrreration()
-{
-	int worstTourLength = 0;
-	for(size_t j = 0; j < m_noNodes; j++)
-	{
-		m_worstIrrPath[j] = m_Ants[worseindex].getCity(j);
-	}
-	return m_worstIrrPath;
-}
-*/
 //************************************
 // Method:    evaporateAllPhero
 // FullName:  CAntSystem::evaporateAllPhero
@@ -309,6 +261,19 @@ double CAntSystem::calculatePathLength(const std::vector<size_t> &currentPath) c
 	d += (*m_distanceMatrix)[currentPath[m_noNodes-1]][currentPath[0]];
 	return d;
 }
+double CAntSystem::calculatePathLength2(const std::vector<size_t> &currentPath) const
+{
+	size_t  start, end;
+	double d = 0;
+	for ( size_t i=1; i<currentPath.size(); i++)
+	{
+		start = currentPath[i-1];
+		end = currentPath[i];
+		d += (*m_distanceMatrix)[start][end];	
+	}
+//	d += (*m_distanceMatrix)[currentPath[m_noNodes-1]][currentPath[0]];
+	return d;
+}
 //************************************
 // Method:    calculateHeuristicMatrix
 // FullName:  CAntSystem::calculateHeuristicMatrix
@@ -333,6 +298,40 @@ void CAntSystem::calculateHeuristicMatrix()
 // Returns:   void
 // Qualifier:
 //************************************
+void CAntSystem::calculateNearestNeigbhor(unsigned int NUMOFANTS)
+{
+	if(NUMOFANTS >= m_noNodes)
+		NUMOFANTS= m_noNodes -1;
+	
+	unsigned int i = 0;
+	int *pHelpArray = new int[m_noNodes];
+	double *pdistanceArray = new double[m_noNodes ];
+	*(pdistanceArray) =(std::numeric_limits<double>::max)();
+
+	m_nnList.resize(m_noNodes);
+	for (unsigned int i = 0; i < m_noNodes; ++i)
+		m_nnList[i].resize(NUMOFANTS);
+
+
+	for (unsigned int node = 0; node < m_noNodes; node++) 
+	{ 
+
+		for (i = 0; i < m_noNodes; i++) 
+		{
+			*(pdistanceArray+i)=(*m_distanceMatrix)[node][i];
+			*(pHelpArray+i)=  i;
+		}
+		double max = (std::numeric_limits<double>::max)() - 1; 
+		*(pdistanceArray+node) =  (std::numeric_limits<double>::max)();  // set to a large value .. 
+		this->m_pLocalSearch->sort2(pdistanceArray, pHelpArray, 0, static_cast<unsigned int>(m_noNodes - 1));
+		for (i = 0; i < NUMOFANTS; i++) 
+		{
+			m_nnList[node][i] = *(pHelpArray+i);
+		}
+	}
+	delete [] pHelpArray;
+	delete [] pdistanceArray;
+}
 bool CAntSystem::updateBestSoFarPath()
 {
 

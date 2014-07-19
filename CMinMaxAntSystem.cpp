@@ -63,46 +63,6 @@ double CMinMaxAntSystem::nodeBranching(double l) const
 	return this->m_newPheromoneMatrix->average_lambda_branching_factor(l);
 }
 //************************************
-// Method:    calculateNearestNeigbhor
-// FullName:  CMinMaxAntSystem::calculateNearestNeigbhor
-// Access:    private 
-// Returns:   void
-// Qualifier:
-// Parameter: unsigned int noOfNeigbours
-//************************************
-void CMinMaxAntSystem::calculateNearestNeigbhor(unsigned int noOfNeigbours)
-{
-	int *pHelpArray = new int[m_noNodes];
-	double *pdistanceArray = new double[m_noNodes ];
-	*(pdistanceArray) =(std::numeric_limits<double>::max)();
-
-	m_nnList.resize(m_noNodes);
-		for (size_t i = 0; i < m_noNodes; ++i)
-			m_nnList[i].resize(noOfNeigbours);
-
-	
-	for (size_t node = 0; node < m_noNodes; node++) 
-	{ 
-
-		for (size_t i = 0; i < m_noNodes; i++) 
-		{
-			*(pdistanceArray+i)=(*m_distanceMatrix)[node][i];
-			*(pHelpArray+i)=  static_cast<int>(i);
-		}
-
-		double max = (std::numeric_limits<double>::max)() - 1; 
-		*(pdistanceArray+node) =  (std::numeric_limits<double>::max)();  // set to a large value .. 
-		this->m_pLocalSearch->sort2(pdistanceArray, pHelpArray, 0, static_cast<unsigned int>(m_noNodes - 1));
-
-		for (size_t i = 0; i < noOfNeigbours; i++) 
-		{
-			m_nnList[node][i] = *(pHelpArray+i);
-		}
-	}
-	delete [] pHelpArray;
-	delete [] pdistanceArray;
-}
-//************************************
 // Method:    updateBestSoFarPath
 // FullName:  CMinMaxAntSystem::updateBestSoFarPath
 // Access:    virtual public 
@@ -149,7 +109,6 @@ void CMinMaxAntSystem::initPheromones()
 {
 		std::vector<bool> visited(m_noNodes);
 		std::vector<size_t> nntour(m_noNodes);
-		calculateNearestNeigbhor(15);
 		//calculate min max values inital
 		int phase = 0;
 		int rnd= (rand()%(visited.size()-1))+1;

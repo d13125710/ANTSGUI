@@ -35,7 +35,6 @@ private:
 	
 	//added
 private:
-	void calculateNearestNeigbhor(unsigned int numberOfNeg);
 	void initPheromoneTrails(double initialValue) const;
 	void globalUpdatePheromone(const std::vector<size_t> &AntTour);
  	void chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour);

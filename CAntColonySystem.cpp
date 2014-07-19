@@ -8,18 +8,19 @@
 
 
 CAntColonySystem::CAntColonySystem(Parameters &Par, MatrixArrayTypeInt *matrix)
-			: CAntSystem(Par , matrix)
+			: CAntSystem(Par , matrix) 
 {
 	this->xi = Par.xi;
     this->q0 =Par.q0;
 	this->m_r0 = Par.r0;
     this->tau0 = 0;
-	this->m_noAnts=30;
+	this->m_noAnts=25;
 	if(m_noNodes <= m_noAnts )
 		m_noAnts = 30;
 
 	//this->m_rho=0.1;
-	
+	//uniform_real<double> m_ChoiceExplore(0.0, 1);
+
 }
 
 CAntColonySystem::~CAntColonySystem(void)
@@ -211,14 +212,20 @@ void CAntColonySystem::initPheromones()
 
 	std::vector<bool> visited(m_noNodes);
 	std::vector<size_t> nntour(m_noNodes+1);
-	calculateNearestNeigbhor(15);
 	//calculate min max values inital
 	int phase = 0;
-	int rnd= (rand()%(visited.size()-1))+1;
+	int rnd=(rand()%(visited.size()-1))+1;
 	nntour[0] =rnd;
 	visited[rnd] = true;
 	chooseClosestNext(visited, nntour);
-	double distance = this->calculatePathLength( nntour);
+	//double distance = this->calculatePathLength( nntour);
+		nntour[m_noNodes] = nntour[0];
+	//m_pLocalSearch->opt3(nntour);
+		//
+	m_pLocalSearch->three_opt_first(nntour , m_nnList);
+	
+	
+	double distance = this->calculatePathLength2( nntour);
 	tau0 =  1. / ((m_noNodes) * distance);
 	//tau0 = 1. / ((m_rho) * distance) / (2. * m_noAnts/m_noNodes);
 	
@@ -229,17 +236,19 @@ void CAntColonySystem::initPheromones()
 		for (j = 0; j <= i; j++) 
 		{
 			m_newPheromoneMatrix->set(i , j , tau0);
-			//	m_newPheromoneMatrix->set(j , i , initialValue);
-
-			//	(*m_pheromoneMatrix)[i][j] = initialValue;
-			//	(*m_pheromoneMatrix)[j][i] = initialValue;
 		}
 	}
+
+	m_BestAntToDate.setAntsTour(nntour);
+	m_BestAntToDate.setAntTourLength(distance);
+
 
 	for(i = 0; i < m_noNodes; i++)
 		m_newPheromoneMatrix->set(i , i , 0);
 	for(unsigned int i=0;i<this->m_noNodes;i++)
 		this->m_newPheromoneMatrix->set(i, i , 0.0);
+
+	calculateHeuristicMatrix();
 
 //	this->updateBestSoFarPath();
 
@@ -261,7 +270,7 @@ Finally, the ant is moved to the chosen city, which is marked as visited (lines 
 and 19).
 */
 
-void CAntColonySystem::decisionRule(size_t k, size_t step)
+void CAntColonySystem::decisionRule(size_t k, size_t step, uniform_real<double> &rndSelTrsh, uniform_real<double> &choiceE)
 {
      //roulette wheel selection  
 	size_t c = m_Ants[k].getCity(step-1); 
@@ -277,14 +286,13 @@ void CAntColonySystem::decisionRule(size_t k, size_t step)
 				sum_prob +=t_prob[i];
 			}
 		}
-		//test
-		//m_strength[m_noNodes]=0;
-
-	
 		for (size_t z =0; z < m_noNodes; z++)
 			m_strength[z+1] = t_prob[z] + m_strength[z];
 				
-		double x = fRand(0,  m_strength[m_noNodes]);
+		//rndSelTrsh
+		double x = rndSelTrsh(g_rndTravel) * m_strength[m_noNodes];
+		
+		//double x = fRand(0,  m_strength[m_noNodes]);
 		
 		int j = 0;
 		while (!((m_strength[j] <= x) && (x <= m_strength[j+1])))
@@ -304,7 +312,8 @@ void CAntColonySystem::decisionRule(size_t k, size_t step)
 				maxHeuristicIdx = j;
 			}
         }
-		x = fRand(0, 1);	
+		x=choiceE(g_rndTravel);
+	//	x = fRand(0, 1);	
         if(x < q0)  
 		{
             m_Ants[k].setAntCity(step, maxHeuristicIdx);
@@ -352,11 +361,16 @@ void CAntColonySystem::constructSolutions()
 
 	}
 
+	uniform_real<double> rndSelTrsh(0.0, 1);
+	uniform_real<double> m_ChoiceExplore(0.0 , 1.0);
+
+
 	for(size_t step = 1 ; step < m_noNodes; step++)
 	{
 		for(size_t k = 0; k < m_Ants.size(); k++)
 		{
-			decisionRule2(k,step);
+			decisionRule(k,step, rndSelTrsh, m_ChoiceExplore);
+			//decisionRule2(k,step);
 			localPheromoneUpdate(k,step);
 		
 		}
@@ -514,37 +528,6 @@ void CAntColonySystem::decisionRule2(size_t k, size_t phase)
 
 }
 
-void CAntColonySystem::calculateNearestNeigbhor(unsigned int NUMOFANTS)
-{
-	unsigned int i = 0;
-	int *pHelpArray = new int[m_noNodes];
-	double *pdistanceArray = new double[m_noNodes ];
-	*(pdistanceArray) =(std::numeric_limits<double>::max)();
-
-	m_nnList.resize(m_noNodes);
-	for (unsigned int i = 0; i < m_noNodes; ++i)
-		m_nnList[i].resize(NUMOFANTS);
-
-
-	for (unsigned int node = 0; node < m_noNodes; node++) 
-	{ 
-
-		for (i = 0; i < m_noNodes; i++) 
-		{
-			*(pdistanceArray+i)=(*m_distanceMatrix)[node][i];
-			*(pHelpArray+i)=  i;
-		}
-		double max = (std::numeric_limits<double>::max)() - 1; 
-		*(pdistanceArray+node) =  (std::numeric_limits<double>::max)();  // set to a large value .. 
-		this->m_pLocalSearch->sort2(pdistanceArray, pHelpArray, 0, static_cast<unsigned int>(m_noNodes - 1));
-		for (i = 0; i < NUMOFANTS; i++) 
-		{
-			m_nnList[node][i] = *(pHelpArray+i);
-		}
-	}
-	delete [] pHelpArray;
-	delete [] pdistanceArray;
-}
 void CAntColonySystem::chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour)
 {
 	size_t city, current_city, next_city;

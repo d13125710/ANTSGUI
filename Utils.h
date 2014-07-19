@@ -72,3 +72,16 @@ inline std::string format(const char* fmt, ...){
 	delete[] buffer;
 	return ret;
 }
+
+inline double fRand(double a, double b)
+{
+	static bool seeded = false;
+	if(!seeded) {
+		srand((unsigned )time(NULL));
+		seeded = true;
+	}
+	long _rnd = rand();
+	if (_rnd == 0)
+		_rnd++;
+	return b * (double)_rnd / RAND_MAX;	
+}
