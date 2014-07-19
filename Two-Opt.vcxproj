@@ -198,6 +198,7 @@
     <ClInclude Include="CMinMaxAntSystem.h" />
     <ClInclude Include="CTSPLIBFileReader.h" />
     <ClInclude Include="DistanceHelper.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="MakeString.h" />
     <ClInclude Include="PheroMatrix.h" />
     <ClInclude Include="Resource.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="Chromo1.cpp" />
     <ClCompile Include="CMinMaxAntSystem.cpp" />
     <ClCompile Include="CTSPLIBFileReader.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <string>
 #include <cstdarg>
@@ -85,3 +87,4 @@ inline double fRand(double a, double b)
 		_rnd++;
 	return b * (double)_rnd / RAND_MAX;	
 }
+#endif /

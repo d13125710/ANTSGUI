@@ -242,7 +242,7 @@ UINT MyThreadGEN(LPVOID pParam)
 		{
 			d = dist;
 			static newTour tour;
-		//	tour.Tour= reinterpret_cast<size_t>(ga.getBestSoFarPath());
+			tour.Tour= ga.getBestSoFarPathsize_t();
 			//tour.Tour = ga
 			tour.Irreation = i;
 			tour.TourLenght = d;
@@ -414,7 +414,7 @@ void TSPalgorithm::Run(Parameters &par ,   std::vector<std::vector<int> >  &matr
 
 	this->m_par =par;
 
-	if(!m_pThread)
+	if(!0)
 	{
 		//enum {MMAS = 0 , ACS=1 , AS=2 , GS=3, EAS=4 , BWAS=5};
 		matrix_ = matrix;

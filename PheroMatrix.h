@@ -16,6 +16,9 @@ public:
 	~PheroMatrix(void){
 		delete matrix_;
 	}
+	MatrixArrayTypeDouble *getMatrix(){
+			return matrix_;
+	}
 	PheroMatrix(size_t size, double evaporation_rate, double initial_pheromone){
 		matrix_ = new MatrixArrayTypeDouble(size , size);
 		evaporation_rate_ = evaporation_rate;

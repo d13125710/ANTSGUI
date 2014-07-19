@@ -153,9 +153,9 @@ void CTSPLIBFileReader::calculateDistanceMatrix()
 		for(size_t i = 0 ; i< Vsize ; i++)
 			m_theMatrix[i].resize(Vsize);
 		
-		for (int i=0; i<m_coordsVector.size(); i++) 
+		for (size_t i=0; i<m_coordsVector.size(); i++) 
 		{
-			for (int j=0; j<m_coordsVector.size(); j++)
+			for (size_t j=0; j<m_coordsVector.size(); j++)
 				m_theMatrix[i][j]  = (int) p_mDistanceCalculator->calculate(m_coordsVector[i].x, m_coordsVector[i].y, m_coordsVector[j].x, m_coordsVector[j].y);
 			
 		}

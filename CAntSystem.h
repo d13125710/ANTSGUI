@@ -13,6 +13,8 @@
 #include "PheroMatrix.h"
 #include "Utils.h"
 
+#include "Log.h"
+
 typedef std::vector<std::vector<double> > MatrixArrayTypeDouble;
 typedef std::vector<std::vector<int> > MatrixArrayTypeInt;
 
@@ -22,7 +24,7 @@ using namespace std;
 class CAntSystem
 {
 
-	
+	antlogger::CLog clog;
 	void calculateNearestNeigbhor(unsigned int NUMOFANTS=20);
 
 protected:
@@ -37,6 +39,15 @@ protected:
 	CAnt *m_pWorstAntItt, *m_pBestAntItt;
 
 	MatrixArrayTypeDouble *m_heuristicMatrix;
+
+	MatrixArrayTypeDouble * HeuristicMatrix() const {
+		return m_heuristicMatrix; 
+	}
+	void HeuristicMatrix(MatrixArrayTypeDouble * val) 
+	{ 
+		m_heuristicMatrix = val; 
+	}
+
 	MatrixArrayTypeInt  *m_distanceMatrix;
 	long irreationSinceLastBest;
 	

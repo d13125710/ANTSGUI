@@ -38,7 +38,9 @@ public:
 	int getIteration() const;
 	void initPopulation();
 	void stepGeneration();
+	//refactor
  	const std::vector<int> &getBestSoFarPath();
+	std::vector<size_t> getBestSoFarPathsize_t();
 	void localSearch();
 	int computePathLength(const std::vector<int> &tour);
 	CGeneticSystem(void);

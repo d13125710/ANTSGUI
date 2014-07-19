@@ -80,6 +80,7 @@ void CGeneticSystem::updateBestSoFarPath()
 }
 std::vector<int> & CGeneticSystem::getBestPath()
 {
+	
 	SortPopulation(m_ChromoPopulation , true);
 	return m_ChromoPopulation[0].getPath();
 }
@@ -261,6 +262,16 @@ const std::vector<int> & CGeneticSystem::getBestSoFarPath()
 {
 	return m_bestSoFarPath;
 }
+std::vector<size_t> CGeneticSystem::getBestSoFarPathsize_t()
+{
+	vector<size_t> path(m_bestSoFarPath.size());
+	for(size_t i=0;i<m_bestSoFarPath.size();i++)
+	{
+		path[i]= static_cast<size_t>(m_bestSoFarPath[i]);
+	}
+	return path;
+
+}
 int CGeneticSystem::getBestSoFarPathLength()
 {
     return computePathLength(m_bestSoFarPath);
@@ -270,14 +281,14 @@ void CGeneticSystem::localSearch(){
 	{
         for(int i = 0; i < m_populationSize; i++)
 		{
-//            m_pLocalSearch->opt2(m_ChromoPopulation[i].getPath());
+      //      m_pLocalSearch->opt2(m_ChromoPopulation[i].getPath());
         }
     }
     if(m_bOpt3Search)
 	{
         for(int i = 0; i < m_populationSize; i++)
 		{
-//            m_pLocalSearch->opt3(m_ChromoPopulation[i].getPath());
+   //         m_pLocalSearch->opt3(m_ChromoPopulation[i].getPath());
         }
     }
     updateBestSoFarPath();

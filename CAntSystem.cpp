@@ -16,7 +16,7 @@
 // Parameter: MatrixArrayTypeInt * distanceMatrix
 //************************************
 CAntSystem::CAntSystem(Parameters& Par, MatrixArrayTypeInt *distanceMatrix) : 
-	m_distanceMatrix(distanceMatrix) 
+	m_distanceMatrix(distanceMatrix) , clog("filename.data" ,Par)
 {
 	//m_distanceMatrix = distanceMatrix;
 	Create(Par);
@@ -77,6 +77,14 @@ void CAntSystem::Create(Parameters& Par)
 
 	calculateNearestNeigbhor();
 
+
+	
+	clog << &std::string("test data\n");
+	clog.logMatrix(m_distanceMatrix);
+
+	clog.logMatrix(m_heuristicMatrix);
+
+	clog.logMatrix(m_newPheromoneMatrix->getMatrix());
 
 }
 
@@ -397,6 +405,13 @@ bool CAntSystem::updateBestSoFarPath()
 //************************************
 CAntSystem::~CAntSystem(void)
 {
+	
+	clog.logMatrix(m_distanceMatrix);
+
+	clog.logMatrix(m_heuristicMatrix);
+
+	clog.logMatrix(m_newPheromoneMatrix->getMatrix());
+	
 	delete m_heuristicMatrix;
 	delete m_pLocalSearch;
 	delete m_newPheromoneMatrix;

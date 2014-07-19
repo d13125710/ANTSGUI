@@ -26,8 +26,8 @@ public:
 	void bwas_pheromone_mutation(  );
 	virtual void initPheromones();
 
-	void chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour);
-	void calculateNearestNeigbhor(unsigned int NUMOFANTS);
+//	void chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour);
+//	void calculateNearestNeigbhor(unsigned int NUMOFANTS);
 
 
 };

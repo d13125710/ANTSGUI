@@ -6,6 +6,15 @@
 
 
 
+//************************************
+// Method:    CBestWorstAntSystem
+// FullName:  CBestWorstAntSystem::CBestWorstAntSystem
+// Access:    public 
+// Returns:   
+// Qualifier: : CAntSystem(Par , distanceMatrix)
+// Parameter: Parameters & Par
+// Parameter: MatrixArrayTypeInt * distanceMatrix
+//************************************
 CBestWorstAntSystem::CBestWorstAntSystem(Parameters& Par,MatrixArrayTypeInt *distanceMatrix) 
 	: CAntSystem(Par , distanceMatrix)
 {
@@ -116,76 +125,28 @@ long CBestWorstAntSystem::distance_between_ants( const CAnt &worseA, const CAnt 
 	}
 	return distance;
 }
-void CBestWorstAntSystem::chooseClosestNext(std::vector<bool> &antsvisted , std::vector<size_t> &nntour)
-{
-	size_t city, current_city, next_city;
-	int min_distance;
-	next_city =this->m_noNodes;
 
-	for(size_t phase = 1; phase < m_noNodes; phase++)
-	{
-		current_city = nntour[phase - 1];
-		min_distance = (std::numeric_limits<int>::max)();
-
-		for (city = 0; city < m_noNodes; city++)
-		{
-			if (antsvisted[city])
-				; /* city already visited */
-			else
-			{
-
-				if ((*m_distanceMatrix)[current_city][city] < min_distance)
-				{
-					next_city = city;
-					min_distance = (*m_distanceMatrix)[current_city][city];
-				}
-			}
-		}
-
-
-		nntour[phase] = next_city;
-		antsvisted[next_city] = true;
-	}
-
-}
-void CBestWorstAntSystem::calculateNearestNeigbhor(unsigned int NUMOFANTS)
-{
-	unsigned int i = 0;
-	int *pHelpArray = new int[m_noNodes];
-	double *pdistanceArray = new double[m_noNodes ];
-	*(pdistanceArray) =(std::numeric_limits<double>::max)();
-
-	m_nnList.resize(m_noNodes);
-	for (unsigned int i = 0; i < m_noNodes; ++i)
-		m_nnList[i].resize(NUMOFANTS);
-
-
-	for (unsigned int node = 0; node < m_noNodes; node++) 
-	{ 
-
-		for (i = 0; i < m_noNodes; i++) 
-		{
-			*(pdistanceArray+i)=(*m_distanceMatrix)[node][i];
-			*(pHelpArray+i)=  i;
-		}
-		//double max = (std::numeric_limits<double>::max)() - 1; 
-		*(pdistanceArray+node) =  (std::numeric_limits<double>::max)();  // set to a large value .. 
-		this->m_pLocalSearch->sort2(pdistanceArray, pHelpArray, 0, static_cast<unsigned int>(m_noNodes - 1));
-		for (i = 0; i < NUMOFANTS; i++) 
-		{
-			m_nnList[node][i] = *(pHelpArray+i);
-		}
-	}
-	delete [] pHelpArray;
-	delete [] pdistanceArray;
-}
-
+//************************************
+// Method:    initPheromones
+// FullName:  CBestWorstAntSystem::initPheromones
+// Access:    virtual public 
+// Returns:   void
+// Qualifier:
+//************************************
 void CBestWorstAntSystem::initPheromones() 
 {
 	initPheromoneTrails(trail_0);
 	//CAntSystem::initPheromones();
 }
 
+//************************************
+// Method:    initPheromoneTrails
+// FullName:  CBestWorstAntSystem::initPheromoneTrails
+// Access:    public 
+// Returns:   void
+// Qualifier: const
+// Parameter: double initialValue
+//************************************
 void CBestWorstAntSystem::initPheromoneTrails(double initialValue) const
 {
 	std::string s =format("init pheromone trails %.15f  @ %d",initialValue ,m_iterations);
@@ -208,6 +169,13 @@ void CBestWorstAntSystem::initPheromoneTrails(double initialValue) const
 
 
 //The pheromone update is a little bit different: on each iteration, the best to date ant deposits an additional quantity of pheromone on paths it traveled:
+//************************************
+// Method:    updatePheromones
+// FullName:  CBestWorstAntSystem::updatePheromones
+// Access:    virtual public 
+// Returns:   void
+// Qualifier:
+//************************************
 void CBestWorstAntSystem::updatePheromones()
 {
 	//get the best at so far
