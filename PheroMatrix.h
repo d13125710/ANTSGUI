@@ -61,6 +61,17 @@ public:
 		(*matrix_)[v][w] *= 1 - evaporation_rate_;
 		(*matrix_)[w][v] = (*matrix_)[v][w];
 	}
+	
+	//************************************
+	// Method:    evaporate1
+	// FullName:  PheroMatrix::evaporate1
+	// Access:    public 
+	// Returns:   void
+	// Qualifier:
+	// Parameter: size_t v
+	// Parameter: size_t w
+	// Definition: for use with asemertical matrix
+	//************************************
 	void evaporate1(size_t v, size_t w) {
 		(*matrix_)[v][w] *= 1 - evaporation_rate_;
 
@@ -109,17 +120,16 @@ public:
 
 	double average_lambda_branching_factor(double lambda) {
 		double sum = 0.0;
-		for(unsigned int i=0;i<this->size();i++) {
+		for(unsigned int i=0;i<this->size();i++){
 			sum += lambda_branching_factor(i, lambda);
 		}
 		return sum / (this->size() *2);
 	}
-	/* compute average pheromone trail on edges of global best solution */
+	/* compute average pheromone trail on edges of an ants path */
 	double averagePheromoneTrail(std::vector<size_t> &AntPath){
 		double avg_trail=0.0;
 		size_t noNodes =  AntPath.size();
-		for ( size_t i = 0 ; i < noNodes-1 ; i++ ) 
-		{
+		for ( size_t i = 0 ; i < noNodes-1 ; i++ ){
 			avg_trail +=  (*matrix_)[AntPath[i]][AntPath[i+1]];
 		}
 		avg_trail /= (double) noNodes;
@@ -128,10 +138,9 @@ public:
 	double evaporateAntPath(std::vector<size_t> &AntPath){
 		double avg_trail=0.0;
 		size_t noNodes =  AntPath.size();
-		for ( size_t i = 1 ; i < noNodes ; i++ ) 
-		{
-			size_t to = AntPath[i]; //h
-			size_t from = AntPath[i-1]; //j
+		for ( size_t i = 1 ; i < noNodes ; i++ ){
+			size_t to = AntPath[i]; 
+			size_t from = AntPath[i-1];
 			evaporate(to,from);
 		}
 

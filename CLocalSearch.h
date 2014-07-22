@@ -45,6 +45,8 @@ public:
 	}
 
 
+	
+
 	void opt2(std::vector<size_t> &tour)
 	 {
         size_t i;

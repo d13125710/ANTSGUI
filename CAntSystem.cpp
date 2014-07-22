@@ -219,7 +219,7 @@ void CAntSystem::constructSolutions()
 		m_Ants[k].setCityVisited(m_randomPath[k]);
 
 	}
-	uniform_real<double> rndSelTrsh(0.0, 1);
+	uniform_real<double> rndSelTrsh(0.0,1.0);
 
 	for(size_t step = 1 ; step < m_noNodes; step++)
 	{
